@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Anonymous Project Homepage</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2430;
+      --muted: #5a6475;
+      --line: #dde2ec;
+      --accent: #0f6fff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #f8f9fc 0%, #eef2f9 100%);
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h1, h2, h3 { margin-top: 0; line-height: 1.3; }
+    h1 { font-size: 2rem; margin-bottom: 8px; }
+    h2 { font-size: 1.35rem; margin-bottom: 10px; }
+    h3 { font-size: 1.05rem; margin-bottom: 8px; }
+    p, li { color: var(--text); }
+    .muted { color: var(--muted); }
+    .banner {
+      border-left: 4px solid var(--accent);
+      padding: 10px 12px;
+      background: #f2f7ff;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    .pill {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e9f1ff;
+      border: 1px solid #cddfff;
+      color: #184a9f;
+      font-size: 0.86rem;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+    code, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      font-size: 0.92rem;
+    }
+    pre {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      overflow-x: auto;
+      background: #f8faff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+    }
+    th { background: #f4f7fc; }
+    tr:last-child td { border-bottom: none; }
+    .footer {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 8px 0 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="card">
+      <h1>Anonymous Project Homepage</h1>
+      <div class="banner">
+        <strong>Anonymous Submission.</strong> This page is provided for double-blind review.
+      </div>
+      <p class="muted">
+        Replace all placeholder content before final release.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>TL;DR</h2>
+      <p>
+        We study <strong>action-conditioned selective latent updates</strong> for robot manipulation.
+        Instead of dense full-state updates, we update only a small subset of local latent states
+        likely to be affected by the current action.
+      </p>
+      <div>
+        <span class="pill">World Model</span>
+        <span class="pill">Selective Update</span>
+        <span class="pill">Robot Manipulation</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Problem</h2>
+      <p>
+        Dense latent updates can spend substantial computation on regions not causally impacted by the action.
+        We ask whether action-conditioned local updates can preserve control quality while improving update efficiency.
+      </p>
+      <ol>
+        <li>Can we identify action-relevant local latent states?</li>
+        <li>Can we update only those states without hurting task success?</li>
+        <li>When do explicit updates beat selection-only baselines?</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Method Overview</h2>
+      <pre><code>z_t --(policy)--> a_t
+z_t, a_t --(selector)--> M_t
+z_t, a_t, M_t --(transition)--> z_{t+1} (selective update)</code></pre>
+      <ol>
+        <li>Encode current observation into latent tokens.</li>
+        <li>Predict an action-conditioned mask over local tokens.</li>
+        <li>Apply transition deltas only on selected tokens.</li>
+        <li>Use the updated state for control.</li>
+      </ol>
+    </section>
+
+    <section class="card">
+      <h2>Experimental Setup</h2>
+      <h3>Benchmarks</h3>
+      <ul>
+        <li>LIBERO (full suites)</li>
+        <li>RoboTwin (full tasks and phases)</li>
+      </ul>
+      <h3>Variants</h3>
+      <p><code>dense</code>, <code>selective_update</code>, <code>model_action</code>, <code>model</code>, <code>norm</code>, <code>random</code></p>
+      <h3>Protocol</h3>
+      <ul>
+        <li>Full training and full evaluation</li>
+        <li>10 trials per task</li>
+        <li>Multi-GPU parallel execution</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Results (Placeholder)</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Benchmark</th>
+            <th>dense</th>
+            <th>selective_update</th>
+            <th>model_action</th>
+            <th>model</th>
+            <th>norm</th>
+            <th>random</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>LIBERO</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+          </tr>
+          <tr>
+            <td>RoboTwin</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+            <td>TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Reproducibility</h2>
+      <h3>Main Command (Placeholder)</h3>
+      <pre><code>python scripts/run_paper_main_full_benchmark_selective_update.py \
+  --output-root runs/full_bench_anonymous \
+  --num-trials 10 \
+  --variants dense,selective_update,model_action,model,norm,random</code></pre>
+      <h3>Expected Artifacts</h3>
+      <ul>
+        <li>Offline artifacts (<code>01..06</code>) for both benchmarks</li>
+        <li>Full evaluation outputs for all variants</li>
+        <li>Manifest and logs</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>Anonymity Checklist</h2>
+      <ol>
+        <li>No author names, affiliations, or personal links.</li>
+        <li>No identity-revealing repository links or badges.</li>
+        <li>No metadata leaks in figures/PDFs.</li>
+        <li>No personal commit history in the public repo.</li>
+      </ol>
+    </section>
+
+    <div class="footer">
+      Anonymous submission page template.
+    </div>
+  </div>
+</body>
+</html>

@@ -3,227 +3,189 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Anonymous Project Homepage</title>
-  <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #1f2430;
-      --muted: #5a6475;
-      --line: #dde2ec;
-      --accent: #0f6fff;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      color: var(--text);
-      background: linear-gradient(180deg, #f8f9fc 0%, #eef2f9 100%);
-      line-height: 1.6;
-    }
-    .wrap {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
-    }
-    h1, h2, h3 { margin-top: 0; line-height: 1.3; }
-    h1 { font-size: 2rem; margin-bottom: 8px; }
-    h2 { font-size: 1.35rem; margin-bottom: 10px; }
-    h3 { font-size: 1.05rem; margin-bottom: 8px; }
-    p, li { color: var(--text); }
-    .muted { color: var(--muted); }
-    .banner {
-      border-left: 4px solid var(--accent);
-      padding: 10px 12px;
-      background: #f2f7ff;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    .pill {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: #e9f1ff;
-      border: 1px solid #cddfff;
-      color: #184a9f;
-      font-size: 0.86rem;
-      margin-right: 6px;
-      margin-bottom: 6px;
-    }
-    code, pre {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      font-size: 0.92rem;
-    }
-    pre {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      overflow-x: auto;
-      background: #f8faff;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    th, td {
-      border-bottom: 1px solid var(--line);
-      padding: 10px;
-      text-align: left;
-    }
-    th { background: #f4f7fc; }
-    tr:last-child td { border-bottom: none; }
-    .footer {
-      font-size: 0.9rem;
-      color: var(--muted);
-      text-align: center;
-      padding: 8px 0 20px;
-    }
-  </style>
+  <meta name="description" content="FOCUS: Action-Conditioned Partial Rollout for World Action Models" />
+  <meta property="og:title" content="FOCUS: Action-Conditioned Partial Rollout for World Action Models" />
+  <meta property="og:description" content="A dynamics-aware partial rollout framework for World Action Models that updates action-relevant local latent state before action generation." />
+  <meta property="og:image" content="assets/overview.png" />
+  <title>FOCUS | Action-Conditioned Partial Rollout</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="wrap">
-    <section class="card">
-      <h1>Anonymous Project Homepage</h1>
-      <div class="banner">
-        <strong>Anonymous Submission.</strong> This page is provided for double-blind review.
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="hero" id="top">
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="brand" href="#top">FOCUS</a>
+      <div class="nav-links">
+        <a href="#method">Method</a>
+        <a href="#results">Results</a>
+        <a href="#stress">Stress Test</a>
+        <a href="#bibtex">BibTeX</a>
       </div>
-      <p class="muted">
-        Replace all placeholder content before final release.
-      </p>
+    </nav>
+
+    <section class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">World Action Models · Partial Rollout · Robot Control</p>
+        <h1>FOCUS: Action-Conditioned Partial Rollout for World Action Models</h1>
+        <p class="lede">
+          FOCUS updates only the action-relevant local latent tokens during WAM rollout,
+          carrying the rest of the scene through an identity path before action generation.
+        </p>
+        <div class="cta-row">
+          <a class="button primary" href="assets/focus_paper.pdf">Paper</a>
+          <a class="button" href="#method">Method</a>
+          <a class="button" href="https://github.com/submit-anonymous/FOCUS">Code</a>
+        </div>
+      </div>
+      <figure class="hero-card">
+        <img src="assets/overview.png" alt="Overview of the FOCUS partial rollout framework" />
+        <figcaption>Dense rollout teachers supervise a selective student that updates local action-relevant latent state.</figcaption>
+      </figure>
+    </section>
+  </header>
+
+  <main>
+    <section class="section problem">
+      <div class="section-kicker">Motivation</div>
+      <h2>Dense imagination is not always the right default for control.</h2>
+      <div class="two-col">
+        <p>
+          Video generation rewards full-scene future synthesis, but manipulation often depends on a
+          smaller set of local variables: the gripper, contacted objects, target receptacles, and nearby geometry.
+          Updating background tokens can add cost and inject future-latent changes that are irrelevant to the current decision.
+        </p>
+        <p>
+          FOCUS asks a narrower question than whether future imagination is useful:
+          <strong>when a WAM performs latent rollout for control, should every token be updated, or only the parts the action can affect?</strong>
+        </p>
+      </div>
     </section>
 
-    <section class="card">
-      <h2>TL;DR</h2>
-      <p>
-        We study <strong>action-conditioned selective latent updates</strong> for robot manipulation.
-        Instead of dense full-state updates, we update only a small subset of local latent states
-        likely to be affected by the current action.
-      </p>
+    <section class="section" id="method">
+      <div class="section-kicker">Method</div>
+      <h2>Action-conditioned partial rollout</h2>
+      <figure class="wide-figure">
+        <img src="assets/model_comparison.png" alt="Comparison between action-only Fast-WAM, dense rollout, and FOCUS partial rollout" />
+      </figure>
+      <div class="method-grid">
+        <article>
+          <span class="step">01</span>
+          <h3>Select local support</h3>
+          <p>
+            The selector predicts a mask over latent tokens conditioned on the current action context.
+            Its target is not generic saliency: a token must change under a dense teacher and be relevant under forward or inverse action dynamics.
+          </p>
+        </article>
+        <article>
+          <span class="step">02</span>
+          <h3>Update selected tokens</h3>
+          <p>
+            A learned transition head applies residual updates only on the selected support.
+            Unselected tokens are preserved through an identity path rather than replaced by noise or mask tokens.
+          </p>
+        </article>
+        <article>
+          <span class="step">03</span>
+          <h3>Generate actions</h3>
+          <p>
+            The partially rolled-out latent state is consumed by the original Fast-WAM-Joint or Fast-WAM-IDM action head, without behavior-cloning fine-tuning or a second action-refinement pass.
+          </p>
+        </article>
+      </div>
+      <div class="formula-card" aria-label="FOCUS mask rule">
+        <span>Dynamics-aware support:</span>
+        <code>M* = D ∩ (F ∪ I)</code>
+        <p>D gates teacher latent change; F captures forward action sensitivity; I captures inverse action relevance.</p>
+      </div>
+    </section>
+
+    <section class="section" id="results">
+      <div class="section-kicker">LIBERO Main Results</div>
+      <h2>FOCUS improves rollout-based Fast-WAM variants while reducing latency.</h2>
+      <div class="stats-grid">
+        <div class="stat"><span>96.4%</span><p>FOCUS-Joint average success</p></div>
+        <div class="stat"><span>96.8%</span><p>FOCUS-IDM average success</p></div>
+        <div class="stat"><span>0.45s</span><p>FOCUS-Joint inference latency</p></div>
+        <div class="stat"><span>0.68s</span><p>FOCUS-IDM inference latency</p></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Method</th>
+              <th>Success Rate</th>
+              <th>Inference Latency</th>
+              <th>Completion Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Fast-WAM</td><td>96.8%</td><td>0.38s</td><td>19.51s</td></tr>
+            <tr><td>Fast-WAM-Joint</td><td>93.0%</td><td>0.66s</td><td>30.02s</td></tr>
+            <tr><td>Fast-WAM-IDM</td><td>92.3%</td><td>0.95s</td><td>38.63s</td></tr>
+            <tr class="ours"><td>FOCUS-Joint</td><td>96.4%</td><td>0.45s</td><td>32.04s</td></tr>
+            <tr class="ours"><td>FOCUS-IDM</td><td>96.8%</td><td>0.68s</td><td>23.86s</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <figure class="wide-figure compact">
+        <img src="assets/libero_flow.png" alt="LIBERO task flow showing predicted video, mask visualization, and execution" />
+        <figcaption>Simulation flow on a LIBERO Long task: predicted future video, selected mask, and action-output execution.</figcaption>
+      </figure>
+    </section>
+
+    <section class="section split" id="stress">
       <div>
-        <span class="pill">World Model</span>
-        <span class="pill">Selective Update</span>
-        <span class="pill">Robot Manipulation</span>
+        <div class="section-kicker">Stress Test</div>
+        <h2>Transient camera occlusion</h2>
+        <p>
+          We occlude the global camera from 1s to 4s while keeping all other settings fixed.
+          The action-only path struggles after corruption because it has no future-video rollout,
+          while high-latency dense IDM hurts closed-loop recovery. FOCUS combines useful future-latent rollout with lower inference cost.
+        </p>
+        <div class="mini-table">
+          <div><strong>Fast-WAM</strong><span>25%</span></div>
+          <div><strong>Fast-WAM-Joint</strong><span>35%</span></div>
+          <div><strong>Fast-WAM-IDM</strong><span>20%</span></div>
+          <div class="ours"><strong>FOCUS-Joint</strong><span>40%</span></div>
+          <div class="ours"><strong>FOCUS-IDM</strong><span>30%</span></div>
+        </div>
+      </div>
+      <figure>
+        <img src="assets/occlusion.png" alt="Camera occlusion stress test protocol" />
+      </figure>
+    </section>
+
+    <section class="section split real-robot">
+      <figure>
+        <img src="assets/real_robot.png" alt="Real robot experiment workflow on AGILE Piper" />
+      </figure>
+      <div>
+        <div class="section-kicker">Real Robot</div>
+        <h2>Closed-loop deployment on an AGILE Piper arm</h2>
+        <p>
+          The same observation-instruction-action interface is connected to a physical robot for an apple-to-plate manipulation task.
+          The study verifies that partial rollout can run inside a hardware control loop, while larger-scale real-world testing remains future work.
+        </p>
       </div>
     </section>
 
-    <section class="card">
-      <h2>Problem</h2>
-      <p>
-        Dense latent updates can spend substantial computation on regions not causally impacted by the action.
-        We ask whether action-conditioned local updates can preserve control quality while improving update efficiency.
-      </p>
-      <ol>
-        <li>Can we identify action-relevant local latent states?</li>
-        <li>Can we update only those states without hurting task success?</li>
-        <li>When do explicit updates beat selection-only baselines?</li>
-      </ol>
+    <section class="section citation" id="bibtex">
+      <div class="section-kicker">Citation</div>
+      <h2>BibTeX</h2>
+      <pre><code>@inproceedings{focus2026partialrollout,
+  title     = {FOCUS: Action-Conditioned Partial Rollout for World Action Models},
+  author    = {Anonymous Authors},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026}
+}</code></pre>
     </section>
+  </main>
 
-    <section class="card">
-      <h2>Method Overview</h2>
-      <pre><code>z_t --(policy)--> a_t
-z_t, a_t --(selector)--> M_t
-z_t, a_t, M_t --(transition)--> z_{t+1} (selective update)</code></pre>
-      <ol>
-        <li>Encode current observation into latent tokens.</li>
-        <li>Predict an action-conditioned mask over local tokens.</li>
-        <li>Apply transition deltas only on selected tokens.</li>
-        <li>Use the updated state for control.</li>
-      </ol>
-    </section>
-
-    <section class="card">
-      <h2>Experimental Setup</h2>
-      <h3>Benchmarks</h3>
-      <ul>
-        <li>LIBERO (full suites)</li>
-        <li>RoboTwin (full tasks and phases)</li>
-      </ul>
-      <h3>Variants</h3>
-      <p><code>dense</code>, <code>selective_update</code>, <code>model_action</code>, <code>model</code>, <code>norm</code>, <code>random</code></p>
-      <h3>Protocol</h3>
-      <ul>
-        <li>Full training and full evaluation</li>
-        <li>10 trials per task</li>
-        <li>Multi-GPU parallel execution</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h2>Results (Placeholder)</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Benchmark</th>
-            <th>dense</th>
-            <th>selective_update</th>
-            <th>model_action</th>
-            <th>model</th>
-            <th>norm</th>
-            <th>random</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>LIBERO</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-          </tr>
-          <tr>
-            <td>RoboTwin</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-            <td>TBD</td>
-          </tr>
-        </tbody>
-      </table>
-    </section>
-
-    <section class="card">
-      <h2>Reproducibility</h2>
-      <h3>Main Command (Placeholder)</h3>
-      <pre><code>python scripts/run_paper_main_full_benchmark_selective_update.py \
-  --output-root runs/full_bench_anonymous \
-  --num-trials 10 \
-  --variants dense,selective_update,model_action,model,norm,random</code></pre>
-      <h3>Expected Artifacts</h3>
-      <ul>
-        <li>Offline artifacts (<code>01..06</code>) for both benchmarks</li>
-        <li>Full evaluation outputs for all variants</li>
-        <li>Manifest and logs</li>
-      </ul>
-    </section>
-
-    <section class="card">
-      <h2>Anonymity Checklist</h2>
-      <ol>
-        <li>No author names, affiliations, or personal links.</li>
-        <li>No identity-revealing repository links or badges.</li>
-        <li>No metadata leaks in figures/PDFs.</li>
-        <li>No personal commit history in the public repo.</li>
-      </ol>
-    </section>
-
-    <div class="footer">
-      Anonymous submission page template.
-    </div>
-  </div>
+  <footer>
+    <p>FOCUS project page · built for anonymous review</p>
+    <a href="#top">Back to top ↑</a>
+  </footer>
 </body>
 </html>

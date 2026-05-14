@@ -1,178 +1,136 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="FOCUS: Action-Conditioned Partial Rollout for World Action Models" />
-  <meta property="og:title" content="FOCUS: Action-Conditioned Partial Rollout for World Action Models" />
-  <meta property="og:description" content="A dynamics-aware partial rollout framework for World Action Models that updates action-relevant local latent state before action generation." />
-  <meta property="og:image" content="assets/overview.png" />
-  <title>FOCUS | Action-Conditioned Partial Rollout</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FOCUS: Action-Conditioned Partial Rollout for World Action Models">
+  <title>FOCUS: Action-Conditioned Partial Rollout for World Action Models</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
-
-  <header class="hero" id="top">
-    <nav class="nav" aria-label="Primary navigation">
-      <a class="brand" href="#top">FOCUS</a>
-      <div class="nav-links">
-        <a href="#method">Method</a>
-        <a href="#results">Results</a>
-        <a href="#stress">Stress Test</a>
+  <main class="container">
+    <header class="header">
+      <h1>FOCUS: Action-Conditioned Partial Rollout for World Action Models</h1>
+      <p class="authors">Anonymous Authors</p>
+      <p class="venue">Anonymous Submission</p>
+      <div class="links">
+        <a href="assets/focus_paper.pdf">Paper</a>
+        <a href="https://github.com/submit-anonymous/FOCUS">Code</a>
         <a href="#bibtex">BibTeX</a>
       </div>
-    </nav>
+    </header>
 
-    <section class="hero-grid">
-      <div class="hero-copy">
-        <p class="eyebrow">World Action Models · Partial Rollout · Robot Control</p>
-        <h1>FOCUS: Action-Conditioned Partial Rollout for World Action Models</h1>
-        <p class="lede">
-          FOCUS updates only the action-relevant local latent tokens during WAM rollout,
-          carrying the rest of the scene through an identity path before action generation.
-        </p>
-        <div class="cta-row">
-          <a class="button primary" href="assets/focus_paper.pdf">Paper</a>
-          <a class="button" href="#method">Method</a>
-          <a class="button" href="https://github.com/submit-anonymous/FOCUS">Code</a>
-        </div>
+    <section class="tldr">
+      <h2>TL;DR</h2>
+      <p>
+        FOCUS updates only action-relevant local latent tokens during World Action Model rollout,
+        preserving the benefit of future-latent inference while avoiding dense full-scene transition.
+      </p>
+    </section>
+
+    <figure class="figure">
+      <img src="assets/overview.png" alt="Overview of FOCUS">
+      <figcaption>
+        FOCUS learns a dynamics-aware selector and local transition head from dense rollout teachers.
+        At inference time, selected tokens are updated while unselected tokens follow an identity path.
+      </figcaption>
+    </figure>
+
+    <section>
+      <h2>Abstract</h2>
+      <p>
+        World Action Models (WAMs) promise to improve robot control by grounding actions in predicted
+        future scene states. However, dense future synthesis updates the full latent scene, while many
+        manipulation decisions depend on only a small set of local variables. FOCUS addresses this mismatch
+        with an action-conditioned partial rollout framework. It predicts the local support relevant to the
+        current action, applies learned transition only on this support, and carries the remaining tokens through
+        an identity path before action generation.
+      </p>
+      <p>
+        The selector is distilled from dense rollout teachers using pseudo-labels that require both teacher
+        latent change and forward or inverse action relevance. We instantiate FOCUS in the Joint and IDM
+        rollout paths of Fast-WAM. On LIBERO, FOCUS improves Fast-WAM-Joint from 93.0% to 96.4%
+        success and Fast-WAM-IDM from 92.3% to 96.8%, while reducing mean inference latency from
+        0.66s to 0.45s and from 0.95s to 0.68s, respectively.
+      </p>
+    </section>
+
+    <section>
+      <h2>Core Question</h2>
+      <div class="qa">
+        <p><strong>Q.</strong> If a WAM performs future-latent rollout for control, does it need to update the entire scene?</p>
+        <p><strong>A.</strong> No. Updating action-relevant local latent state is sufficient to recover the useful control signal in rollout-based Fast-WAM variants.</p>
       </div>
-      <figure class="hero-card">
-        <img src="assets/overview.png" alt="Overview of the FOCUS partial rollout framework" />
-        <figcaption>Dense rollout teachers supervise a selective student that updates local action-relevant latent state.</figcaption>
+    </section>
+
+    <section>
+      <h2>Method</h2>
+      <figure class="figure">
+        <img src="assets/model_comparison.png" alt="Comparison between action-only Fast-WAM, dense rollout, and FOCUS">
+        <figcaption>
+          FOCUS lies between action-only inference and dense rollout: it keeps future-latent inference but updates only selected local support.
+        </figcaption>
       </figure>
-    </section>
-  </header>
-
-  <main>
-    <section class="section problem">
-      <div class="section-kicker">Motivation</div>
-      <h2>Dense imagination is not always the right default for control.</h2>
-      <div class="two-col">
-        <p>
-          Video generation rewards full-scene future synthesis, but manipulation often depends on a
-          smaller set of local variables: the gripper, contacted objects, target receptacles, and nearby geometry.
-          Updating background tokens can add cost and inject future-latent changes that are irrelevant to the current decision.
-        </p>
-        <p>
-          FOCUS asks a narrower question than whether future imagination is useful:
-          <strong>when a WAM performs latent rollout for control, should every token be updated, or only the parts the action can affect?</strong>
-        </p>
-      </div>
+      <p>
+        FOCUS uses the support rule <span class="math">D ∩ (F ∪ I)</span>. The change gate <span class="math">D</span>
+        selects tokens changed by the dense teacher, while <span class="math">F</span> and <span class="math">I</span>
+        identify forward and inverse action relevance. A learned selector predicts this support at inference time,
+        and a transition head predicts residual updates only for selected tokens.
+      </p>
     </section>
 
-    <section class="section" id="method">
-      <div class="section-kicker">Method</div>
-      <h2>Action-conditioned partial rollout</h2>
-      <figure class="wide-figure">
-        <img src="assets/model_comparison.png" alt="Comparison between action-only Fast-WAM, dense rollout, and FOCUS partial rollout" />
+    <section>
+      <h2>Results</h2>
+      <p>
+        We evaluate on all four LIBERO suites. Each suite contains 10 tasks, and each task is evaluated with
+        100 closed-loop trials. FOCUS improves both rollout-based Fast-WAM variants while reducing inference latency.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Success Rate</th>
+            <th>Inference Latency</th>
+            <th>Completion Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Fast-WAM</td><td>96.8%</td><td>0.38s</td><td>19.51s</td></tr>
+          <tr><td>Fast-WAM-Joint</td><td>93.0%</td><td>0.66s</td><td>30.02s</td></tr>
+          <tr><td>Fast-WAM-IDM</td><td>92.3%</td><td>0.95s</td><td>38.63s</td></tr>
+          <tr class="ours"><td>FOCUS-Joint</td><td>96.4%</td><td>0.45s</td><td>32.04s</td></tr>
+          <tr class="ours"><td>FOCUS-IDM</td><td>96.8%</td><td>0.68s</td><td>23.86s</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Simulation and Stress-Test Visualizations</h2>
+      <figure class="figure">
+        <img src="assets/libero_flow.png" alt="LIBERO task flow">
+        <figcaption>
+          LIBERO task flow: predicted future video, mask visualization, and action-output execution.
+        </figcaption>
       </figure>
-      <div class="method-grid">
-        <article>
-          <span class="step">01</span>
-          <h3>Select local support</h3>
-          <p>
-            The selector predicts a mask over latent tokens conditioned on the current action context.
-            Its target is not generic saliency: a token must change under a dense teacher and be relevant under forward or inverse action dynamics.
-          </p>
-        </article>
-        <article>
-          <span class="step">02</span>
-          <h3>Update selected tokens</h3>
-          <p>
-            A learned transition head applies residual updates only on the selected support.
-            Unselected tokens are preserved through an identity path rather than replaced by noise or mask tokens.
-          </p>
-        </article>
-        <article>
-          <span class="step">03</span>
-          <h3>Generate actions</h3>
-          <p>
-            The partially rolled-out latent state is consumed by the original Fast-WAM-Joint or Fast-WAM-IDM action head, without behavior-cloning fine-tuning or a second action-refinement pass.
-          </p>
-        </article>
-      </div>
-      <div class="formula-card" aria-label="FOCUS mask rule">
-        <span>Dynamics-aware support:</span>
-        <code>M* = D ∩ (F ∪ I)</code>
-        <p>D gates teacher latent change; F captures forward action sensitivity; I captures inverse action relevance.</p>
-      </div>
-    </section>
-
-    <section class="section" id="results">
-      <div class="section-kicker">LIBERO Main Results</div>
-      <h2>FOCUS improves rollout-based Fast-WAM variants while reducing latency.</h2>
-      <div class="stats-grid">
-        <div class="stat"><span>96.4%</span><p>FOCUS-Joint average success</p></div>
-        <div class="stat"><span>96.8%</span><p>FOCUS-IDM average success</p></div>
-        <div class="stat"><span>0.45s</span><p>FOCUS-Joint inference latency</p></div>
-        <div class="stat"><span>0.68s</span><p>FOCUS-IDM inference latency</p></div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Method</th>
-              <th>Success Rate</th>
-              <th>Inference Latency</th>
-              <th>Completion Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>Fast-WAM</td><td>96.8%</td><td>0.38s</td><td>19.51s</td></tr>
-            <tr><td>Fast-WAM-Joint</td><td>93.0%</td><td>0.66s</td><td>30.02s</td></tr>
-            <tr><td>Fast-WAM-IDM</td><td>92.3%</td><td>0.95s</td><td>38.63s</td></tr>
-            <tr class="ours"><td>FOCUS-Joint</td><td>96.4%</td><td>0.45s</td><td>32.04s</td></tr>
-            <tr class="ours"><td>FOCUS-IDM</td><td>96.8%</td><td>0.68s</td><td>23.86s</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <figure class="wide-figure compact">
-        <img src="assets/libero_flow.png" alt="LIBERO task flow showing predicted video, mask visualization, and execution" />
-        <figcaption>Simulation flow on a LIBERO Long task: predicted future video, selected mask, and action-output execution.</figcaption>
+      <figure class="figure">
+        <img src="assets/occlusion.png" alt="Camera occlusion stress test">
+        <figcaption>
+          Camera occlusion stress test: the global camera is occluded from 1s to 4s and then restored.
+        </figcaption>
       </figure>
     </section>
 
-    <section class="section split" id="stress">
-      <div>
-        <div class="section-kicker">Stress Test</div>
-        <h2>Transient camera occlusion</h2>
-        <p>
-          We occlude the global camera from 1s to 4s while keeping all other settings fixed.
-          The action-only path struggles after corruption because it has no future-video rollout,
-          while high-latency dense IDM hurts closed-loop recovery. FOCUS combines useful future-latent rollout with lower inference cost.
-        </p>
-        <div class="mini-table">
-          <div><strong>Fast-WAM</strong><span>25%</span></div>
-          <div><strong>Fast-WAM-Joint</strong><span>35%</span></div>
-          <div><strong>Fast-WAM-IDM</strong><span>20%</span></div>
-          <div class="ours"><strong>FOCUS-Joint</strong><span>40%</span></div>
-          <div class="ours"><strong>FOCUS-IDM</strong><span>30%</span></div>
-        </div>
-      </div>
-      <figure>
-        <img src="assets/occlusion.png" alt="Camera occlusion stress test protocol" />
+    <section>
+      <h2>Real-Robot Deployment</h2>
+      <figure class="figure">
+        <img src="assets/real_robot.png" alt="Real robot experiment workflow">
+        <figcaption>
+          Real-robot workflow on an AGILE Piper arm for the task: pick up the apple and place it on the plate.
+        </figcaption>
       </figure>
     </section>
 
-    <section class="section split real-robot">
-      <figure>
-        <img src="assets/real_robot.png" alt="Real robot experiment workflow on AGILE Piper" />
-      </figure>
-      <div>
-        <div class="section-kicker">Real Robot</div>
-        <h2>Closed-loop deployment on an AGILE Piper arm</h2>
-        <p>
-          The same observation-instruction-action interface is connected to a physical robot for an apple-to-plate manipulation task.
-          The study verifies that partial rollout can run inside a hardware control loop, while larger-scale real-world testing remains future work.
-        </p>
-      </div>
-    </section>
-
-    <section class="section citation" id="bibtex">
-      <div class="section-kicker">Citation</div>
+    <section id="bibtex">
       <h2>BibTeX</h2>
       <pre><code>@inproceedings{focus2026partialrollout,
   title     = {FOCUS: Action-Conditioned Partial Rollout for World Action Models},
@@ -183,9 +141,8 @@
     </section>
   </main>
 
-  <footer>
-    <p>FOCUS project page · built for anonymous review</p>
-    <a href="#top">Back to top ↑</a>
+  <footer class="footer">
+    Website adapted from common academic project-page templates.
   </footer>
 </body>
 </html>
